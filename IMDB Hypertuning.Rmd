@@ -1,0 +1,228 @@
+---
+title: "Lecture 3 - exercise"
+author: "Dolores Chu"
+date: "1/21/2020"
+output: html_document
+---
+
+
+```{r}
+library (keras)
+
+imdb <- dataset_imdb(num_words = 10000)
+set.seed(123)
+c(c(train_data, train_labels), c(test_data, test_labels)) %<-% imdb
+vectorize_sequences <- function(sequences, dimension = 10000) {
+  results <- matrix(0, nrow = length(sequences), ncol = dimension)
+  for (i in 1:length(sequences))
+    results[i, sequences[[i]]] <- 1
+  results
+}
+x_train <- vectorize_sequences(train_data)
+x_test <- vectorize_sequences(test_data)
+
+y_train <- as.numeric(train_labels)
+y_test <- as.numeric(test_labels)
+```
+
+Orignal Code
+```{r}
+model <- keras_model_sequential() %>% 
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 16, activation = "relu") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+
+For the IMDB example that we discussed in class, do the following:
+
+ You used two hidden layers. Try using one or three hidden layers, and see how doing so affects validation and test accuracy. 
+```{r}
+#One hidden layers
+set.seed(123)
+model_1 <- keras_model_sequential() %>% 
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model_1 %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model_1 %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model_1 %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+Changing the model into only having one hidden layer actually incrases the accuracy a tiny bit!
+
+```{r}
+#Three hidden layers
+set.seed(123)
+model_3 <- keras_model_sequential() %>% 
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 16, activation = "relu") %>% 
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+model_3 %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model_3 %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model_3 %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+Not as good as the precious two models.
+ 
+ 
+ 
+Try using layers with more hidden units or fewer hidden units: 32 units, 64 units, and so on. 
+```{r}
+#Fewer hidden units
+set.seed(123)
+model_8u <- keras_model_sequential() %>% 
+  layer_dense(units = 8, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 8, activation = "relu") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model_8u %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model_8u %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model_8u %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+Having only 8 nodes per dense laayer results in about the same accuracy as the original model.
+
+```{r}
+#More hidden units
+set.seed(123)
+model_32u <- keras_model_sequential() %>% 
+  layer_dense(units = 32, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 32, activation = "relu") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model_32u %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model_32u %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model_32u %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+Hvaing 32 nodes make the accuracy slightly btter (not really much).
+
+```{r}
+#Even more hidden units
+set.seed(123)
+model_64u <- keras_model_sequential() %>% 
+  layer_dense(units = 64, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 64, activation = "relu") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model_64u %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model_64u %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model_64u %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+Again, slihgtly worse than the original. 
+
+
+Try using the mse loss function instead of binary_crossentropy. 
+```{r}
+set.seed(123)
+model <- keras_model_sequential() %>% 
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>% 
+  layer_dense(units = 16, activation = "relu") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "mean_squared_error",
+  metrics = c("accuracy")
+)
+
+model %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+
+Try using the tanh activation (an activation that was popular in the early days of neural networks) instead of relu.
+```{r}
+model <- keras_model_sequential() %>% 
+  layer_dense(units = 16, activation = "tanh", input_shape = c(10000)) %>% 
+  layer_dense(units = 16, activation = "tanh") %>% 
+  layer_dense(units = 1, activation = "sigmoid")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+model %>% fit(x_train, y_train, epochs = 4, batch_size = 512)
+results <- model %>% evaluate(x_test, y_test)
+```
+
+```{r}
+results
+```
+
+
+
+Your R code
+A summary, graph/table, that summarizes your results with hypertuning the parameters for the IMDB problem. This graph or table should clearly indicate what "your" final conclusions or story will be. Apply all what you have learnt in data visualization.
+There is no need to specifically answer the above four questions. 
+Your final grade will be a combination of validation accuracy and your graph/table presentation.
+
+
+
+
+
+
+
+
+
